@@ -3,11 +3,42 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Logo } from "@/components/shared/Logo"
-import { ROLE_META } from "@/data/constants"
 import { cn } from "@/lib/utils"
 
-export function LoginPanel({ role, setRole, onLogin, initialMode = "login", onBack }: { role: string; setRole: (r: string) => void; onLogin: () => void; initialMode?: "login" | "register"; onBack?: () => void }) {
+export function LoginPanel({ 
+  onLogin, 
+  onRegister,
+  initialMode = "login", 
+  onBack 
+}: { 
+  onLogin: (data: any) => void; 
+  onRegister: (data: any) => void;
+  initialMode?: "login" | "register"; 
+  onBack?: () => void 
+}) {
   const [mode, setMode] = useState<"login" | "register">(initialMode)
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    full_name: "",
+    confirmPassword: ""
+  })
+
+  const handleSubmit = () => {
+    if (mode === "login") {
+      onLogin({ username: formData.username, password: formData.password })
+    } else {
+      if (formData.password !== formData.confirmPassword) {
+        alert("Password tidak cocok")
+        return
+      }
+      onRegister({ 
+        username: formData.username, 
+        password: formData.password, 
+        full_name: formData.full_name 
+      })
+    }
+  }
 
   return (
     <div className="flex min-h-[80vh] w-full items-center justify-center py-6">
@@ -26,8 +57,10 @@ export function LoginPanel({ role, setRole, onLogin, initialMode = "login", onBa
             <h2 className="text-3xl font-display font-semibold tracking-tight text-slate-900">
               {mode === "login" ? "Masuk ke Dayapala" : "Daftar ke Dayapala"}
             </h2>
-            <p className="mt-2 text-slate-500">
-              {mode === "login" ? "Pilih peran Anda untuk mengakses halaman dan fitur sesuai kebutuhan operasional." : "Buat akun untuk mengakses ekosistem Dayapala sesuai peran Anda."}
+            <p className="mt-2 text-slate-500 text-sm">
+              {mode === "login" 
+                ? "Gunakan akun kredensial Anda untuk masuk ke sistem operasional Dayapala." 
+                : "Lengkapi formulir di bawah ini untuk mendaftarkan akun baru ke ekosistem Dayapala."}
             </p>
           </div>
 
@@ -36,55 +69,48 @@ export function LoginPanel({ role, setRole, onLogin, initialMode = "login", onBa
               {mode === "register" && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">Nama Lengkap / Organisasi</label>
-                  <Input className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" placeholder="Koperasi Merah Putih" />
+                  <Input 
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" 
+                    placeholder="Koperasi Merah Putih" 
+                  />
                 </div>
               )}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Email atau Nomor Anggota</label>
-                <Input className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" placeholder="nama@email.com" />
+                <label className="text-sm font-medium text-slate-700">Username atau Email</label>
+                <Input 
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" 
+                  placeholder="admin" 
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Kata Sandi</label>
-                <Input className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" placeholder="••••••••" type="password" />
+                <Input 
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" 
+                  placeholder="••••••••" 
+                  type="password" 
+                />
               </div>
               {mode === "register" && (
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">Konfirmasi Kata Sandi</label>
-                  <Input className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" placeholder="••••••••" type="password" />
+                  <Input 
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="h-12 rounded-2xl bg-slate-50 focus:bg-white focus:ring-emerald-500" 
+                    placeholder="••••••••" 
+                    type="password" 
+                  />
                 </div>
               )}
             </div>
-            
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-slate-700">Pilih Peran Anda</label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(ROLE_META).map(([key, meta]) => {
-                  const Icon = meta.icon
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setRole(key)}
-                      className={cn(
-                        "group flex items-start gap-4 rounded-[20px] border p-4 text-left transition-all",
-                        role === key ? "border-emerald-500 bg-emerald-50/50 shadow-sm ring-1 ring-emerald-500" : "border-slate-200 bg-white hover:border-emerald-200 hover:bg-slate-50 hover:shadow-sm"
-                      )}
-                    >
-                      <div className={cn(
-                        "rounded-xl p-2 ring-1 transition-colors",
-                        role === key ? "bg-emerald-600 text-white ring-emerald-600" : "bg-slate-100 text-slate-500 ring-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-700 group-hover:ring-emerald-200"
-                      )}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className={cn("text-sm font-semibold transition-colors", role === key ? "text-emerald-950" : "text-slate-700 group-hover:text-emerald-900")}>{meta.label}</p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
 
-            <Button onClick={onLogin} className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-base font-medium text-white shadow-lg shadow-emerald-900/20 transition-transform active:scale-95 hover:from-emerald-700 hover:to-teal-700">
+            <Button onClick={handleSubmit} className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-base font-medium text-white shadow-lg shadow-emerald-900/20 transition-transform active:scale-95 hover:from-emerald-700 hover:to-teal-700">
               {mode === "login" ? "Masuk" : "Daftar Akun"}
             </Button>
 

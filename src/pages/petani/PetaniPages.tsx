@@ -180,10 +180,14 @@ export function PetaniTambahPage({ onSubmitHarvest }: any) {
   )
 }
 
-export function PetaniRiwayatPage({ supplies }: any) {
+export function PetaniRiwayatPage({ supplies, formatDate, onDownload }: any) {
   return (
     <div className="space-y-6">
-      <PageHeader title="Arsip Histori Pasokan" description="Pantau status dan catatan dari setiap batch yang pernah Anda setor ke sistem Dayapala." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Unduh PDF</Button>} />
+      <PageHeader 
+        title="Arsip Histori Pasokan" 
+        description="Pantau status dan catatan dari setiap batch yang pernah Anda setor ke sistem Dayapala." 
+        actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => onDownload("RiwayatPetani", supplies)}>Unduh CSV</Button>} 
+      />
       <Surface>
         <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5 rounded-t-[32px]">
           <CardTitle className="text-lg text-slate-800">Daftar Batch Pasok</CardTitle>
@@ -204,7 +208,7 @@ export function PetaniRiwayatPage({ supplies }: any) {
                 </div>
                 <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
                   <StatusBadge>{row.status}</StatusBadge>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Update Hari Ini</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{formatDate(row.created_at)}</span>
                 </div>
               </div>
             ))}

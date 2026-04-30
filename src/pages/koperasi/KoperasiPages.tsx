@@ -10,8 +10,9 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { StatCard } from "@/components/shared/StatCard"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { DetailModal } from "@/components/shared/DetailModal"
 
-export function KoperasiDashboard({ supplies, matches, inflationRows, scores, setPage, openMatchDetail, openScoreDetail }: any) {
+export function KoperasiDashboard({ supplies, matches, inflationRows, scores, setPage, openMatchDetail, openScoreDetail, runMatching, onDownload }: any) {
   return (
     <div className="space-y-6">
       <PageHeader
@@ -109,7 +110,7 @@ export function KoperasiDashboard({ supplies, matches, inflationRows, scores, se
                   <div>
                     <h5 className="font-semibold text-slate-900">{row.commodity}</h5>
                     <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                      <MapPinned className="h-3 w-3" />
+                      <MapPinned className="h-3.5 w-3.5" />
                       <span>{row.region}</span>
                     </div>
                   </div>
@@ -198,7 +199,7 @@ export function KoperasiDashboard({ supplies, matches, inflationRows, scores, se
   )
 }
 
-export function InputPanenPage({ supplies, onSubmitHarvest }: any) {
+export function InputPanenPage({ supplies, onSubmitHarvest, onValidateSupply }: any) {
   const [form, setForm] = useState({ farmer: "", commodity: "", volume: "", village: "", price: "" })
   const [query, setQuery] = useState("")
   const filtered = useMemo(() => {
@@ -297,14 +298,21 @@ export function InputPanenPage({ supplies, onSubmitHarvest }: any) {
                       </div>
                       <div className="hidden sm:flex flex-col items-end gap-2 w-40 shrink-0">
                         <StatusBadge>{row.status}</StatusBadge>
-                        <Button size="sm" variant="outline" className="h-8 rounded-full border-emerald-200 text-emerald-700 hover:bg-emerald-50 w-full opacity-0 group-hover:opacity-100 transition-opacity">Validasi</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 rounded-full border-emerald-200 text-emerald-700 hover:bg-emerald-50 w-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => onValidateSupply(row.id)}
+                          disabled={row.status === "Tervalidasi"}
+                        >
+                          {row.status === "Tervalidasi" ? "Selesai" : "Validasi"}
+                        </Button>
                       </div>
                     </div>
                     
-                    {/* Mobile Only CTA */}
                     <div className="w-full flex justify-between items-center sm:hidden mt-2">
                        <StatusBadge>{row.status}</StatusBadge>
-                       <Button size="sm" variant="outline" className="h-8 rounded-full border-emerald-200 text-emerald-700">Validasi</Button>
+                       <Button size="sm" variant="outline" className="h-8 rounded-full border-emerald-200 text-emerald-700" onClick={() => onValidateSupply(row.id)}>Validasi</Button>
                     </div>
                   </div>
                 ))}
@@ -317,25 +325,51 @@ export function InputPanenPage({ supplies, onSubmitHarvest }: any) {
   )
 }
 
-export function DemandPage({ demands }: any) {
+export function DemandPage({ demands, setPage }: any) {
+  const [selectedDemand, setSelectedDemand] = useState<any>(null)
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Demand Vendor / SPPG" 
-        description="Pantau dan kelola semua permintaan pasok dari dapur umum atau restoran mitra." 
-        actions={<Button className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all hover:scale-[1.02]">Ajukan Permintaan Baru</Button>} 
-      />
+      <DetailModal 
+        isOpen={!!selectedDemand} 
+        onClose={() => setSelectedDemand(null)} 
+        title="Detail Kebutuhan Vendor"
+      >
+        {selectedDemand && (
+          <div className="space-y-4">
+             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <h4 className="font-bold text-slate-900">{selectedDemand.buyer}</h4>
+                <p className="text-sm text-slate-500">Prioritas: {selectedDemand.priority}</p>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                   <span className="text-[10px] font-bold text-slate-400 uppercase">Komoditas</span>
+                   <p className="font-semibold text-slate-800">{selectedDemand.commodity}</p>
+                </div>
+                <div className="space-y-1">
+                   <span className="text-[10px] font-bold text-slate-400 uppercase">Volume</span>
+                   <p className="font-semibold text-slate-800">{selectedDemand.amount}</p>
+                </div>
+                <div className="space-y-1">
+                   <span className="text-[10px] font-bold text-slate-400 uppercase">Batas ETA</span>
+                   <p className="font-semibold text-slate-800">{selectedDemand.schedule}</p>
+                </div>
+             </div>
+             <Button className="w-full rounded-xl bg-emerald-600" onClick={() => { setSelectedDemand(null); setPage("matching"); }}>Cari Kandidat via AI</Button>
+          </div>
+        )}
+      </DetailModal>
+      <PageHeader title="Manajemen Demand Vendor" description="Tinjau daftar pesanan dari Dapur Umum Vendor SPPG & MBG yang perlu pemenuhan pasokan segera." actions={<Button className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all hover:scale-[1.02]">Ajukan Permintaan Baru</Button>} />
       <Surface>
         <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5 rounded-t-[32px]">
-          <div className="flex items-center gap-3">
-             <div className="rounded-xl bg-indigo-100 p-2 text-indigo-700">
-                <PackageCheck className="h-5 w-5" />
-             </div>
-             <div>
-                <CardTitle className="text-lg text-slate-800">Kebutuhan Aktif</CardTitle>
-                <CardDescription>Antrean demand yang belum terpenuhi oleh pasokan</CardDescription>
-             </div>
-          </div>
+           <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700">
+                 <PackageCheck className="h-5 w-5" />
+              </div>
+              <div>
+                 <CardTitle className="text-lg text-slate-800">Kebutuhan Aktif</CardTitle>
+                 <CardDescription>Antrean demand yang belum terpenuhi oleh pasokan</CardDescription>
+              </div>
+           </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-slate-100/80">
@@ -361,8 +395,8 @@ export function DemandPage({ demands }: any) {
                 </div>
 
                 <div className="flex w-full lg:w-auto lg:justify-end gap-3 shrink-0 mt-2 lg:mt-0">
-                  <Button size="sm" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 h-10 px-4 w-full lg:w-auto opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all">Lihat kandidat</Button>
-                  <Button size="sm" variant="outline" className="rounded-xl h-10 px-4 border-slate-200 w-full lg:w-auto">Detail</Button>
+                  <Button size="sm" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 h-10 px-4 w-full lg:w-auto opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all" onClick={() => setPage("matching")}>Lihat kandidat</Button>
+                  <Button size="sm" variant="outline" className="rounded-xl h-10 px-4 border-slate-200 w-full lg:w-auto" onClick={() => setSelectedDemand(row)}>Detail</Button>
                 </div>
               </div>
             ))}
@@ -373,10 +407,18 @@ export function DemandPage({ demands }: any) {
   )
 }
 
-export function MatchingPage({ matches, openMatchDetail, onConfirmMatch }: any) {
+export function MatchingPage({ matches, openMatchDetail, onConfirmMatch, runMatching }: any) {
   return (
     <div className="space-y-6">
-      <PageHeader title="AI Matching Supply-Demand" description="Keputusan distribusi didukung AI untuk efisiensi rute, ketepatan volume, dan ketepatan waktu." />
+      <PageHeader 
+        title="AI Matching Supply-Demand" 
+        description="Keputusan distribusi didukung AI untuk efisiensi rute, ketepatan volume, dan ketepatan waktu." 
+        actions={
+          <Button className="rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all hover:scale-[1.02]" onClick={runMatching}>
+            Jalankan AI Matching Baru
+          </Button>
+        }
+      />
       <div className="grid gap-6">
         {matches.map((item: any) => (
           <Surface key={item.id} className="group transition-all duration-300 hover:shadow-lg hover:ring-1 hover:ring-emerald-200">
@@ -438,13 +480,13 @@ export function MatchingPage({ matches, openMatchDetail, onConfirmMatch }: any) 
   )
 }
 
-export function MatchDetailPage({ selectedMatch, onConfirmMatch }: any) {
+export function MatchDetailPage({ selectedMatch, onConfirmMatch, setPage }: any) {
   if (!selectedMatch) {
     return <EmptyState title="Belum ada match terpilih" description="Pilih rekomendasi dari AI Matching Supply-Demand untuk melihat detailnya." />
   }
   return (
     <div className="space-y-6">
-      <PageHeader title="Analisis Rinci Distribusi" description="Tinjau dasar keputusan AI sebelum mengeksekusi perpindahan pasokan." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Kembali</Button>} />
+      <PageHeader title="Analisis Rinci Distribusi" description="Tinjau dasar keputusan AI sebelum mengeksekusi perpindahan pasokan." actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => setPage("matching")}>Kembali</Button>} />
       
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <Surface className="h-fit">
@@ -525,7 +567,7 @@ export function MatchDetailPage({ selectedMatch, onConfirmMatch }: any) {
   )
 }
 
-export function InflasiPage({ inflationRows }: any) {
+export function InflasiPage({ inflationRows, onIntervene }: any) {
   return (
     <div className="space-y-6">
       <PageHeader title="Pemantauan Inflasi Wilayah" description="Deteksi dini anomali harga pangan dan lakukan intervensi distribusi tepat sasaran." />
@@ -579,7 +621,11 @@ export function InflasiPage({ inflationRows }: any) {
                 </div>
 
                 <div className="flex justify-end gap-3 shrink-0">
-                  <Button size="sm" className="rounded-xl h-10 w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
+                  <Button 
+                    size="sm" 
+                    className="rounded-xl h-10 w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
+                    onClick={() => onIntervene(row)}
+                  >
                     Intervensi
                   </Button>
                 </div>
@@ -592,13 +638,13 @@ export function InflasiPage({ inflationRows }: any) {
   )
 }
 
-export function ScoringPage({ scores, openScoreDetail, onRecommendFinance }: any) {
+export function ScoringPage({ scores, openScoreDetail, onRecommendFinance, onDownload, setPage }: any) {
   return (
     <div className="space-y-6">
       <PageHeader 
         title="Alternative Credit Scoring" 
         description="Evaluasi kelayakan supplier untuk modal kerja berdasarkan data operasional dan rekam jejak penyaluran." 
-        actions={<Button className="rounded-2xl border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" variant="outline">Unduh Laporan Portofolio</Button>}
+        actions={<Button className="rounded-2xl border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" variant="outline" onClick={() => onDownload("Scoring", scores)}>Unduh Laporan Portofolio</Button>}
       />
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Surface className="h-fit">
@@ -679,7 +725,7 @@ export function ScoringPage({ scores, openScoreDetail, onRecommendFinance }: any
               </div>
             </div>
             
-            <Button className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-md">Lihat Risk Summary Lengkap</Button>
+            <Button className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-md" onClick={() => onDownload("RiskSummary", scores)}>Lihat Risk Summary Lengkap</Button>
           </CardContent>
         </Surface>
       </div>
@@ -687,13 +733,13 @@ export function ScoringPage({ scores, openScoreDetail, onRecommendFinance }: any
   )
 }
 
-export function ScoreDetailPage({ selectedScore, onRecommendFinance }: any) {
+export function ScoreDetailPage({ selectedScore, onRecommendFinance, setPage }: any) {
   if (!selectedScore) {
     return <EmptyState title="Belum ada supplier terpilih" description="Pilih kandidat dari Alternative Credit Scoring untuk melihat detailnya." />
   }
   return (
     <div className="space-y-6">
-      <PageHeader title="Rating Supplier & Keputusan Pembiayaan" description="Tinjau secara mendalam profil kelayakan kredit dan rekomendasi intervensi pembiayaan." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Kembali</Button>} />
+      <PageHeader title="Rating Supplier & Keputusan Pembiayaan" description="Tinjau secara mendalam profil kelayakan kredit dan rekomendasi intervensi pembiayaan." actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => setPage("scoring")}>Kembali</Button>} />
       
       <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
         <Surface className="h-fit">
@@ -768,7 +814,7 @@ export function ScoreDetailPage({ selectedScore, onRecommendFinance }: any) {
   )
 }
 
-export function AuditPage({ auditRows }: any) {
+export function AuditPage({ auditRows, formatDate }: any) {
   return (
     <div className="space-y-6">
       <PageHeader title="Immutable Audit Log" description="Pusat transparansi dayapala mencatat setiap langkah operasional, dari pasokan hingga distribusi." />
@@ -783,13 +829,13 @@ export function AuditPage({ auditRows }: any) {
              <div className="space-y-8">
                {auditRows.map((row: any, index: number) => (
                  <div key={row.id} className="relative flex gap-6 md:gap-8 group">
-                   <div className="relative z-10 flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm transition-transform group-hover:scale-110">
+                   <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm transition-transform group-hover:scale-110">
                       <FileClock className="h-6 w-6 text-slate-400 group-hover:text-emerald-600 transition-colors" />
                    </div>
                    <div className="flex-1 rounded-[24px] bg-slate-50/50 p-5 ring-1 ring-slate-100 transition-colors group-hover:bg-white group-hover:shadow-md group-hover:ring-slate-200">
                      <div className="flex flex-wrap items-center gap-3 mb-2">
                         <Badge variant="secondary" className="rounded-md bg-white border-slate-200 shadow-sm text-xs font-semibold">{row.tag}</Badge>
-                        <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5"><FileClock className="w-3 h-3"/> {row.time}</span>
+                        <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5"><FileClock className="w-3 h-3"/> {formatDate(row.time)}</span>
                      </div>
                      <h4 className="text-base font-semibold text-slate-900 mb-1">{row.title}</h4>
                      <p className="text-sm font-medium text-emerald-700 mb-3">{row.actor}</p>
@@ -805,11 +851,15 @@ export function AuditPage({ auditRows }: any) {
   )
 }
 
-export function SupplierPage({ scores, openScoreDetail, setPage }: any) {
-  const top = scores[0]
+export function SupplierPage({ scores, openScoreDetail, setPage, onDownload }: any) {
+  const top = scores?.[0] || { id: "1", name: "Kelompok Tani Sumber Rezeki" }
   return (
     <div className="space-y-6">
-      <PageHeader title="Profil Master Supplier" description="Tinjauan menyeluruh terhadap entitas kelompok tani atau vendor, termasuk rekam jejak supply dan credit score." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Unduh Profil</Button>} />
+      <PageHeader 
+        title="Profil Master Supplier" 
+        description="Tinjauan menyeluruh terhadap entitas kelompok tani atau vendor, termasuk rekam jejak supply dan credit score." 
+        actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => onDownload("ProfilSupplier", [top])}>Unduh Profil</Button>} 
+      />
       
       <div className="grid gap-5 md:grid-cols-3">
         <StatCard title="Pasokan Aktif" value="3 Batch" hint="Terdata dalam ekosistem" icon={Wheat} />
@@ -851,13 +901,7 @@ export function SupplierPage({ scores, openScoreDetail, setPage }: any) {
   )
 }
 
-export function NotificationsPage({ setPage }: any) {
-  const alerts = [
-    { text: "Harga komoditas Telur di Sidoarjo mengalami deviasi naik melewati HET.", type: "warning", icon: TrendingUp },
-    { text: "Terdapat permohonan supply baru dari Dapur Umum Vendor SPPG Surabaya Timur.", type: "info", icon: PackageCheck },
-    { text: "Dua batch pasokan gabah telah masuk dan menunggu validasi pihak koperasi.", type: "action", icon: Route },
-    { text: "Pembaharuan Assessment Credit Score berkala untuk Kelompok Tani Sumber Rezeki.", type: "info", icon: Wallet },
-  ]
+export function NotificationsPage({ notifications, formatDate }: any) {
   return (
     <div className="space-y-6">
       <PageHeader title="Notifikasi & Peringatan Otomatis" description="Pantau peringatan dan event penting secara riil-waktu dari seluruh modul." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Tandai Semua Dibaca</Button>} />
@@ -875,21 +919,22 @@ export function NotificationsPage({ setPage }: any) {
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-slate-100/80">
-            {alerts.map((item, i) => (
-              <div key={i} className="p-5 md:p-6 bg-white transition-colors hover:bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm
-                  ${item.type === 'warning' ? 'bg-amber-100 text-amber-600' : 
-                    item.type === 'action' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}
-                `}>
-                   <item.icon className="h-5 w-5" />
+            {notifications.map((item: any) => (
+              <div key={item.id} className="p-5 md:p-6 bg-white transition-colors hover:bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm bg-amber-100 text-amber-600`}>
+                   <Bell className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                   <p className="font-medium text-slate-800 leading-relaxed text-[15px]">{item.text}</p>
-                   <p className="text-xs text-slate-500 mt-1 font-medium tracking-wide uppercase">Hari in • Beberapa detik yang lalu</p>
+                   <p className="font-semibold text-slate-900 leading-relaxed text-[15px]">{item.title}</p>
+                   <p className="text-sm text-slate-600 mt-0.5">{item.message}</p>
+                   <p className="text-xs text-slate-500 mt-2 font-medium tracking-wide uppercase">{formatDate(item.created_at)}</p>
                 </div>
                 <Button size="sm" variant="outline" className="rounded-xl border-slate-200 w-full sm:w-auto mt-2 sm:mt-0 font-medium">Lakukan Tindakan</Button>
               </div>
             ))}
+            {notifications.length === 0 && (
+              <div className="p-12 text-center text-slate-500 font-medium">Tidak ada notifikasi baru.</div>
+            )}
           </div>
         </CardContent>
       </Surface>

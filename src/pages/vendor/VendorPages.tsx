@@ -8,19 +8,57 @@ import { Surface } from "@/components/shared/Surface"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { StatCard } from "@/components/shared/StatCard"
 import { StatusBadge } from "@/components/shared/StatusBadge"
+import { DetailModal } from "@/components/shared/DetailModal"
 
-export function VendorOverviewPage({ demands, setPage }: any) {
+export function VendorOverviewPage({ demands, setPage, onDownload }: any) {
+  const [selectedItem, setSelectedItem] = useState<any>(null)
   return (
     <div className="space-y-6">
+      <DetailModal 
+        isOpen={!!selectedItem} 
+        onClose={() => setSelectedItem(null)} 
+        title="Detail Permintaan Pasok"
+      >
+        {selectedItem && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Komoditas</span>
+                <p className="font-semibold text-slate-900">{selectedItem.commodity}</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Volume</span>
+                <p className="font-semibold text-slate-900">{selectedItem.amount}</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">ETA</span>
+                <p className="font-semibold text-slate-900">{selectedItem.schedule}</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prioritas</span>
+                <StatusBadge>{selectedItem.priority}</StatusBadge>
+              </div>
+            </div>
+            <div className="pt-4 border-t border-slate-100">
+               <Button className="w-full rounded-xl bg-amber-600" onClick={() => { setSelectedItem(null); setPage("candidates"); }}>Cek Kandidat Pemasok</Button>
+            </div>
+          </div>
+        )}
+      </DetailModal>
       <PageHeader 
         title="Dashboard Vendor MBG & SPPG" 
         description="Kelola rantai pasok dapur umum Anda secara efisien, tinjau ketersediaan bahan, dan temukan mitra pemasok terbaik." 
-        actions={<Button className="rounded-2xl bg-amber-600 hover:bg-amber-700 shadow-sm transition-all hover:scale-[1.02]" onClick={() => setPage("ajukan")}>Ajukan Permintaan Pasok</Button>} 
+        actions={
+          <div className="flex gap-3">
+            <Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => onDownload("PermintaanVendor", demands)}>Unduh Laporan</Button>
+            <Button className="rounded-2xl bg-amber-600 hover:bg-amber-700 shadow-sm transition-all hover:scale-[1.02]" onClick={() => setPage("ajukan")}>Ajukan Permintaan Pasok</Button>
+          </div>
+        } 
       />
       <div className="grid gap-5 md:grid-cols-3">
         <StatCard title="Kebutuhan Aktif" value={`${demands.length} Permintaan`} hint="Perlu verifikasi kandidat pasok" icon={PackageCheck} />
         <StatCard title="Prioritas Tinggi" value={demands.filter((d: any) => d.priority === "Tinggi").length.toString()} hint="Harus ditindaklanjuti segera" icon={Bell} />
-        <StatCard title="Kandidat Tervalidasi" value="6 Entitas" hint="Siap untuk dikonfirmasi" icon={Route} />
+        <StatCard title="Kandidat Tervalidasi" value="AI Driven" hint="Siap untuk dikonfirmasi" icon={Route} />
       </div>
       
       <Surface className="flex flex-col">
@@ -48,14 +86,21 @@ export function VendorOverviewPage({ demands, setPage }: any) {
                      <StatusBadge>{row.priority}</StatusBadge>
                    </div>
                    
-                   <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
-                     <Button className="flex-1 md:flex-none rounded-xl bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-500/20 px-6 h-10" onClick={() => setPage("kandidat")}>
-                       Lihat Match
-                     </Button>
-                     <Button variant="outline" className="flex-1 md:flex-none rounded-xl border-slate-200 bg-white hover:bg-slate-50 px-4 h-10">
-                       Detail
-                     </Button>
-                   </div>
+                    <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                      <Button 
+                        className="flex-1 md:flex-none rounded-xl bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-500/20 px-6 h-10" 
+                        onClick={() => setPage("candidates")}
+                      >
+                        Lihat Match
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 md:flex-none rounded-xl border-slate-200 bg-white hover:bg-slate-50 px-4 h-10"
+                        onClick={() => setSelectedItem(row)}
+                      >
+                        Detail
+                      </Button>
+                    </div>
                 </div>
               </div>
             ))}
@@ -162,10 +207,53 @@ export function VendorAjukanPage({ onSubmitDemand }: any) {
   )
 }
 
-export function VendorCandidatesPage({ matches }: any) {
+export function VendorCandidatesPage({ matches, onDownload, setPage }: any) {
+  const [selectedProfile, setSelectedProfile] = useState<any>(null)
   return (
     <div className="space-y-6">
-      <PageHeader title="Rekomendasi Pemasok Terbaik" description="Evaluasi kelompok tani yang telah diseleksi oleh AI Engine Dayapala untuk pemenuhan pasokan spesifik Anda." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Unduh Resume</Button>} />
+      <DetailModal 
+        isOpen={!!selectedProfile} 
+        onClose={() => setSelectedProfile(null)} 
+        title="Profil Kelompok Tani"
+      >
+        {selectedProfile && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50">
+               <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xl">
+                  {selectedProfile.source.charAt(0)}
+               </div>
+               <div>
+                  <h4 className="font-bold text-slate-900 text-lg">{selectedProfile.source}</h4>
+                  <p className="text-sm text-slate-500">Pemasok Terverifikasi Dayapala</p>
+               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm">
+                 <span className="block text-[10px] font-bold text-slate-400 uppercase">Match Fit</span>
+                 <span className="text-lg font-bold text-emerald-600">{selectedProfile.fit}%</span>
+              </div>
+              <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm">
+                 <span className="block text-[10px] font-bold text-slate-400 uppercase">Credit Score</span>
+                 <span className="text-lg font-bold text-blue-600">{selectedProfile.credit}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+               <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Rekam Jejak Operasional</h5>
+               <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-slate-700">✅ 98% Ketepatan ETA Logistik</li>
+                  <li className="flex items-center gap-2 text-sm text-slate-700">✅ Zero Dispute Quality Control</li>
+                  <li className="flex items-center gap-2 text-sm text-slate-700">✅ Kapasitas Pasok Stabil {">"} 5 Ton</li>
+               </ul>
+            </div>
+            <Button className="w-full rounded-xl bg-slate-900" onClick={() => setSelectedProfile(null)}>Tutup Profil</Button>
+          </div>
+        )}
+      </DetailModal>
+      <PageHeader 
+        title="Rekomendasi Pemasok Terbaik" 
+        description="Evaluasi kelompok tani yang telah diseleksi oleh AI Engine Dayapala untuk pemenuhan pasokan spesifik Anda." 
+        actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => onDownload("KandidatPasok", matches)}>Unduh CSV</Button>} 
+      />
       
       <div className="grid gap-6">
         {matches.map((item: any) => (
@@ -207,10 +295,20 @@ export function VendorCandidatesPage({ matches }: any) {
                      </Badge>
                   </div>
                   <div className="flex gap-2 w-full md:w-auto">
-                     <Button className="flex-1 md:flex-none rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm px-6 h-10 w-full md:w-32">
+                     <Button 
+                        className="flex-1 md:flex-none rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm px-6 h-10 w-full md:w-32"
+                        onClick={() => {
+                          alert(`✅ Konfirmasi Berhasil!\nPemasok: ${item.source}\nStatus: Siap Distribusi Logistik.`);
+                          setPage("overview");
+                        }}
+                     >
                         Konfirmasi
                      </Button>
-                     <Button variant="outline" className="flex-1 md:flex-none rounded-xl border-slate-200 px-4 h-10 w-full md:w-32">
+                     <Button 
+                        variant="outline" 
+                        className="flex-1 md:flex-none rounded-xl border-slate-200 px-4 h-10 w-full md:w-32"
+                        onClick={() => setSelectedProfile(item)}
+                     >
                         Lihat Profil
                      </Button>
                   </div>

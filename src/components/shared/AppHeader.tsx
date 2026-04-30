@@ -5,7 +5,7 @@ import { Logo } from "./Logo"
 import { ROLE_META } from "@/data/constants"
 import { cn } from "@/lib/utils"
 
-export function AppHeader({ role, setRole, onLogout, searchQuery, setSearchQuery, onMenuToggle }: any) {
+export function AppHeader({ role, setRole, onLogout, searchQuery, setSearchQuery, onMenuToggle, notifications }: any) {
   return (
     <div className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-6 lg:px-8">
@@ -31,9 +31,11 @@ export function AppHeader({ role, setRole, onLogout, searchQuery, setSearchQuery
         </div>
 
         <div className="flex items-center gap-3 lg:gap-4">
-          <Button variant="ghost" size="icon" className="relative rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+          <Button variant="ghost" size="icon" className="relative rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={() => (window as any).setPage?.("notifikasi")}>
             <Bell className="h-5 w-5" />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+            {notifications?.filter((n: any) => !n.is_read).length > 0 && (
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+            )}
           </Button>
           
           <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>

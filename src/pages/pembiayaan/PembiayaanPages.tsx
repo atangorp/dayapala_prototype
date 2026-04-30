@@ -10,19 +10,19 @@ import { StatCard } from "@/components/shared/StatCard"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { EmptyState } from "@/components/shared/EmptyState"
 
-export function FinanceOverviewPage({ scores, setPage }: any) {
+export function FinanceOverviewPage({ scores, setPage, onDownload }: any) {
   return (
     <div className="space-y-6">
       <PageHeader 
         title="Dashboard Mitra Pembiayaan" 
         description="Akses daftar kandidat prioritas yang telah diverifikasi kelayakannya oleh algoritma Alternative Credit Scoring Dayapala." 
-        actions={<Button className="rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-sm transition-all hover:scale-[1.02]" onClick={() => setPage("risk")}>Unduh Credit Report Berstandar bank</Button>} 
+        actions={<Button className="rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-sm transition-all hover:scale-[1.02]" onClick={() => onDownload("ReportKredit", scores)}>Unduh Credit Report Berstandar Bank</Button>} 
       />
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Total Entitas Aktif" value="120" hint="Dalam ekosistem Dayapala" icon={Users} />
+        <StatCard title="Total Entitas Aktif" value={`${scores.length}`} hint="Dalam ekosistem Dayapala" icon={Users} />
         <StatCard title="Layak Pembiayaan" value={scores.filter((row: any) => row.score >= 80).length.toString()} hint="Skor A dan B" icon={CheckCircle2} />
-        <StatCard title="Perlu Tinjauan" value="46" hint="Skor Borderline" icon={ShieldCheck} />
-        <StatCard title="Top Priority" value="12" hint="Credit Risk Sangat Rendah" icon={Wallet} />
+        <StatCard title="Perlu Tinjauan" value={scores.filter((row: any) => row.score < 80).length.toString()} hint="Skor Borderline" icon={ShieldCheck} />
+        <StatCard title="Top Priority" value={scores.filter((row: any) => row.score >= 90).length.toString()} hint="Credit Risk Sangat Rendah" icon={Wallet} />
       </div>
       
       <Surface className="flex flex-col">
@@ -160,7 +160,7 @@ export function FinanceRiskPage({ selectedScore, onRecommendFinance }: any) {
   )
 }
 
-export function FinanceHistoryPage({ setPage }: any) {
+export function FinanceHistoryPage({ onDownload }: any) {
   const historyData = [
     { name: "Kelompok Tani Sumber Rezeki", status: "Approved", time: "Hari ini", amount: "Rp 150.000.000" },
     { name: "Gapoktan Mina Sejahtera", status: "Review Manual", time: "Kemarin", amount: "Rp 85.000.000" },
@@ -169,7 +169,7 @@ export function FinanceHistoryPage({ setPage }: any) {
   
   return (
     <div className="space-y-6">
-      <PageHeader title="Arsip Evaluasi Keputusan" description="Manajemen portofolio dan penelusuran status pencairan modal kerja." actions={<Button variant="outline" className="rounded-2xl border-slate-200">Unduh PDF Laporan</Button>} />
+      <PageHeader title="Arsip Evaluasi Keputusan" description="Manajemen portofolio dan penelusuran status pencairan modal kerja." actions={<Button variant="outline" className="rounded-2xl border-slate-200" onClick={() => onDownload("HistoryPembiayaan", historyData)}>Unduh CSV Laporan</Button>} />
       <Surface>
         <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5 rounded-t-[32px]">
           <CardTitle className="text-lg text-slate-800">Riwayat Pengajuan Terkini</CardTitle>

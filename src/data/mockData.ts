@@ -33,3 +33,9 @@ export const INITIAL_AUDIT = [
   { id: 2, time: "03 Apr 2026 • 08.22", actor: "AI Matching Engine", title: "Rekomendasi distribusi", detail: "Beras Lamongan diprioritaskan ke SPPG Surabaya Timur dengan kecocokan 94%.", tag: "AI" },
   { id: 3, time: "03 Apr 2026 • 08.40", actor: "Alternative Credit Scoring", title: "Pembaruan skor kredit", detail: "Kelompok Tani Sumber Rezeki memperoleh skor 86 berdasarkan histori transaksi dan pengiriman.", tag: "Pembiayaan" },
 ];
+
+export const DUMMY_USERS = [
+  { username: "koperasi-unesa", password: "password", role: "koperasi", full_name: "Koperasi Unesa" },
+  { username: "petani-magetan", password: "password", role: "petani", full_name: "Petani Magetan" },
+  { username: "sppg-maospati", password: "password", role: "vendor", full_name: "SPPG Maospati" },
+];

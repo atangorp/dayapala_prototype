@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import axios from "axios"
 
 import { NAV_ITEMS } from "@/data/constants"
+import { DUMMY_USERS } from "@/data/mockData"
+
 import { 
   useSupplies, 
   useDemands, 
@@ -274,6 +276,15 @@ export default function App() {
   }
 
   const handleLogin = async (data: any) => {
+    // Check dummy users first
+    const dummyUser = DUMMY_USERS.find(u => u.username === data.username && u.password === data.password);
+    if (dummyUser) {
+      setRole(dummyUser.role);
+      setLoggedIn(true);
+      setBanner(`Selamat datang kembali, ${dummyUser.full_name}!`);
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_BASE_URL}/login`, data);
       const user = response.data;

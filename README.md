@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# Dayapala Prototype
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dayapala adalah platform ekosistem rantai pasok pangan yang menghubungkan petani, koperasi, dan vendor (pembeli) dengan dukungan AI Matching dan Alternative Credit Scoring.
 
-Currently, two official plugins are available:
+## 🚀 Cara Menjalankan Project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Ikuti langkah-langkah berikut untuk menjalankan prototype di komputer lokal Anda:
 
-## React Compiler
+1.  **Instalasi Dependensi**
+    Pastikan Anda sudah menginstal Node.js. Buka terminal di direktori project ini dan jalankan:
+    ```bash
+    npm install
+    ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2.  **Menjalankan Server Development**
+    Setelah instalasi selesai, jalankan perintah berikut:
+    ```bash
+    npm run dev
+    ```
 
-## Expanding the ESLint configuration
+3.  **Akses Aplikasi**
+    Buka browser dan akses alamat yang tertera di terminal (biasanya `http://localhost:5173`).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🔑 Akun Dummy (Login)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Gunakan akun berikut untuk mencoba berbagai peran di dalam sistem Dayapala:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 1. Akun Koperasi
+*   **Username:** `koperasi-unesa`
+*   **Password:** `password`
+*   **Peran:** Mengelola dashboard, validasi pasokan, matching supply-demand, dan scoring.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Akun Petani
+*   **Username:** `petani-magetan`
+*   **Password:** `password`
+*   **Peran:** Input data panen, melihat riwayat pasokan, dan mengecek skor kredit.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Akun Vendor (Pembeli)
+*   **Username:** `sppg-maospati`
+*   **Password:** `password`
+*   **Peran:** Mengajukan permintaan pasokan (demand) dan melihat kandidat penyuplai.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 🛠️ Teknologi yang Digunakan
+*   **Frontend:** React + TypeScript + Vite
+*   **Styling:** Tailwind CSS + Framer Motion
+*   **Backend (Optional):** Terintegrasi dengan Azure Functions (jika .env dikonfigurasi)
